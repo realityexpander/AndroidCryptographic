@@ -66,14 +66,22 @@ class CryptoManager {
 
     fun decrypt(inputStream: InputStream): ByteArray {
         return inputStream.use {
+
+            // Get the size of the initialization vector
             val ivSize = it.read()
+
+            // Get the initialization vector
             val iv = ByteArray(ivSize)
             it.read(iv)
 
+            // Get the size of the encrypted bytes
             val encryptedBytesSize = it.read()
+
+            // Get the encrypted bytes
             val encryptedBytes = ByteArray(encryptedBytesSize)
             it.read(encryptedBytes)
 
+            // Decrypt the bytes
             getDecryptCipherForIv(iv).doFinal(encryptedBytes)
         }
     }
