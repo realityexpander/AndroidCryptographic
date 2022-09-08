@@ -1,4 +1,4 @@
-package com.plcoding.androidcrypto
+package com.realityexpander.androidcrypto
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
@@ -15,6 +15,7 @@ import javax.crypto.spec.IvParameterSpec
 @RequiresApi(Build.VERSION_CODES.M)
 class CryptoManager {
 
+    // Uses the TEE to store the key
     private val keyStore = KeyStore.getInstance("AndroidKeyStore").apply {
         load(null)
     }
@@ -23,7 +24,7 @@ class CryptoManager {
         init(Cipher.ENCRYPT_MODE, getKey())
     }
 
-    private fun getDecryptCipherForIv(iv: ByteArray): Cipher {
+    private fun getDecryptCipherForIv(iv: ByteArray): Cipher {  // iv = initialization vector
         return Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.DECRYPT_MODE, getKey(), IvParameterSpec(iv))
         }
@@ -43,7 +44,7 @@ class CryptoManager {
                 )
                     .setBlockModes(BLOCK_MODE)
                     .setEncryptionPaddings(PADDING)
-                    .setUserAuthenticationRequired(false)
+                    .setUserAuthenticationRequired(false)  // Change this to true if you want to use BiometricPrompt
                     .setRandomizedEncryptionRequired(true)
                     .build()
             )
@@ -52,12 +53,14 @@ class CryptoManager {
 
     fun encrypt(bytes: ByteArray, outputStream: OutputStream): ByteArray {
         val encryptedBytes = encryptCipher.doFinal(bytes)
-        outputStream.use {
+
+        outputStream.use {  // will automatically close the stream when done
             it.write(encryptCipher.iv.size)
             it.write(encryptCipher.iv)
             it.write(encryptedBytes.size)
             it.write(encryptedBytes)
         }
+
         return encryptedBytes
     }
 

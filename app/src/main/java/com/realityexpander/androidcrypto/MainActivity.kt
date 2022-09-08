@@ -1,4 +1,4 @@
-package com.plcoding.androidcrypto
+package com.realityexpander.androidcrypto
 
 import android.content.Context
 import android.os.Build
@@ -10,10 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.datastore.dataStore
-import com.plcoding.androidcrypto.ui.theme.AndroidCryptoTheme
+import com.realityexpander.androidcrypto.ui.theme.AndroidCryptoTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
@@ -30,6 +29,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val cryptoManager = CryptoManager()
+
         setContent {
             AndroidCryptoTheme {
                 var username by remember {
@@ -41,7 +43,16 @@ class MainActivity : ComponentActivity() {
                 var settings by remember {
                     mutableStateOf(UserSettings())
                 }
+
+                var messageToEncrypt by remember {
+                    mutableStateOf("")
+                }
+                var messageToDecrypt by remember {
+                    mutableStateOf("")
+                }
+
                 val scope = rememberCoroutineScope()
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -54,6 +65,7 @@ class MainActivity : ComponentActivity() {
                         placeholder = { Text(text = "Username") }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+
                     TextField(
                         value = password,
                         onValueChange = { password = it },
@@ -61,6 +73,7 @@ class MainActivity : ComponentActivity() {
                         placeholder = { Text(text = "Password") }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Row {
                         Button(onClick = {
                             scope.launch {
@@ -84,6 +97,45 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     Text(text = settings.toString())
+                    Spacer(modifier = Modifier.height(32.dp))
+
+
+                    /////////////////////// simple string example ////////////
+
+                    TextField(
+                        value = messageToEncrypt,
+                        onValueChange = { messageToEncrypt = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(text = "Encrypt string") }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        Button(onClick = {
+                            val bytes = messageToEncrypt.encodeToByteArray()
+                            val file = File(filesDir, "secret.txt")
+                            if(!file.exists()) {
+                                file.createNewFile()
+                            }
+                            val fos = FileOutputStream(file)
+
+                            messageToDecrypt = cryptoManager.encrypt(
+                                bytes = bytes,
+                                outputStream = fos
+                            ).decodeToString()
+                        }) {
+                            Text(text = "Encrypt")
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Button(onClick = {
+                            val file = File(filesDir, "secret.txt")
+                            messageToEncrypt = cryptoManager.decrypt(
+                                inputStream = FileInputStream(file)
+                            ).decodeToString()
+                        }) {
+                            Text(text = "Decrypt")
+                        }
+                    }
+                    Text(text = messageToDecrypt)
                 }
             }
         }
