@@ -55,8 +55,12 @@ class CryptoManager {
         val encryptedBytes = encryptCipher.doFinal(bytes)
 
         outputStream.use {  // will automatically close the stream when done
+
+            // Write the initialization vector to the beginning of the file
             it.write(encryptCipher.iv.size)
             it.write(encryptCipher.iv)
+
+            // Write the encrypted bytes to the file
             it.write(encryptedBytes.size)
             it.write(encryptedBytes)
         }
