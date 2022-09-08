@@ -88,6 +88,7 @@ class MainActivity : ComponentActivity() {
                             Text(text = "Save")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
+
                         Button(onClick = {
                             scope.launch {
                                 settings = dataStore.data.first()
@@ -100,7 +101,7 @@ class MainActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(32.dp))
 
 
-                    /////////////////////// simple string example ////////////
+                    /////////////////////// simple string encryption example ////////////
 
                     TextField(
                         value = messageToEncrypt,
